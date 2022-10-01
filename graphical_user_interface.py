@@ -65,8 +65,7 @@ class main:
                         fg="blue", font=("", 20, "bold"))
         self.pr.pack(pady=20)
 
-        Button(f1, font=("", 15), fg="white", bg="red",
-               text="Clear Canvas", command=self.clear).pack(side=BOTTOM)
+        Button(f1, font=("", 15), fg="white", bg="red", text="Clear Canvas", command=self.clear).pack(side=BOTTOM)
 
         f1.pack(side=RIGHT, fill=Y)
         self.c.bind("<Button-1>", self.putPoint)
