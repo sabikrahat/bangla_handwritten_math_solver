@@ -2,6 +2,7 @@
 from tkinter import *
 from tkinter.ttk import *
 from PIL import ImageGrab
+import win32gui
 
 
 class main:
@@ -91,16 +92,60 @@ class main:
     # Function for getting the image from the canvas
     def get_image(self):
         print('Processing image from the canvas...')
+        ##
+        ## Process: 01
+        print('Processing: 01')
+        ww = self.root.winfo_width()
+        wh = self.root.winfo_height()
+        cw = self.c.winfo_width()
+        ch = self.c.winfo_height()
+        wx = self.root.winfo_rootx()
+        wy = self.root.winfo_rooty()
+        cx = self.c.winfo_rootx()
+        cy = self.c.winfo_rooty()
+        print("Window width: {}, Window height: {}".format(ww, wh))
+        print("Canvas width: {}, Canvas height: {}".format(cw, ch))
+        print("Window x: {}, Window y: {}".format(wx, wy))
+        print("Canvas x: {}, Canvas y: {}".format(cx, cy))
+        img = ImageGrab.grab()
+        img.save("full-screen-P1.png")
+        img = img.crop((cx, cy, cx + self.root_width - 52, cy + self.root_height - 150))
+        img.save("drawn-image-P1.png")
+        print('Process-1 completed...')
+        ##
+        ## Process: 02
+        print('Processing: 02')
         x = self.root.winfo_rootx() + self.c.winfo_x()
         y = self.root.winfo_rooty() + self.c.winfo_y()
         x1 = x + self.c.winfo_width()
         y1 = y + self.c.winfo_height()
         print("x: ", x, "y: ", y, "x1: ", x1, "y1: ", y1)
-        print("Croped window width: ", x1 - x, "and Croped window height: ", y1 - y)
         img = ImageGrab.grab()
-        img.save("full-screen.png")
+        img.save("full-screen-P2.png")
         img = img.crop((x, y, x1, y1))
-        img.save("drawn-image.png")
+        img.save("drawn-image-P2.png")
+        print('Process-2 completed...')
+        ##
+        ## Process: 03
+        print('Processing: 03')
+        HWND = self.c.winfo_id()
+        rect = win32gui.GetWindowRect(HWND)
+        im = ImageGrab.grab(rect)
+        im.save("drawn-image-P3.png")
+        print('Process-3 completed...')
+        ##
+        ## Process: 04
+        print('Processing: 04')
+        ImageGrab.grab(bbox=(
+            self.c.winfo_rootx(),
+            self.c.winfo_rooty(),
+            self.c.winfo_rootx() + self.c.winfo_width(),
+            self.c.winfo_rooty() + self.c.winfo_height()
+        )).save('drawn-image-P4.png')
+        print('Process-4 completed...')
+        ##
+        ## Process: 05
+        ##
         print('Image saved!')
 
     # Function for solving the prediction
@@ -139,99 +184,3 @@ class main:
 # Running the main class
 if __name__ == "__main__":
     main()
-
-# import tkinter as tk
-
-# win = tk.Tk()  # Creating instance of Tk class
-# win.title("Centering self.roots")
-# win.resizable(False, False)  # This code helps to disable self.roots from resizing
-
-
-
-# screen_width = win.winfo_screenwidth()
-# screen_height = win.winfo_screenheight()
-
-# x_cordinate = int((screen_width/2) - (self.root_width/2))
-# y_cordinate = int((screen_height/2) - (self.root_height/2))
-
-# win.geometry("{}x{}+{}+{}".format(self.root_width, self.root_height, x_cordinate, y_cordinate))
-
-# win.mainloop()
-
-# class main:
-#     def __init__(self, master):
-#         self.master = master
-#         self.res = ""
-#         self.pre = [None, None]
-#         self.bs = 8.5
-#         self.c = Canvas(self.master, bd=3, relief="ridge",bg='white')
-#         self.c.pack(side=LEFT)
-#         f1 = Frame(self.master, padx=5, pady=5)
-#         Label(f1, text="Bangla HandWriting Digit Classification",
-#               fg="green", font=("", 15, "bold")).pack(pady=10)
-#         Label(f1, text="Using Python and Keras, Tensorflow",
-#               fg="green", font=("", 15)).pack()
-#         Label(f1, text="Draw On The Canvas Alongside",
-#               fg="green", font=("", 15)).pack()
-#         self.pr = Label(f1, text="Prediction: None",
-#                         fg="blue", font=("", 20, "bold"))
-#         self.pr.pack(pady=20)
-
-#         Button(f1, font=("", 15), fg="white", bg="red",
-#                text="Clear Canvas", command=self.clear).pack(side=BOTTOM)
-
-#         f1.pack(side=RIGHT, fill=Y)
-#         # self.c.bind("<Button-1>", self.putPoint)
-#         # self.c.bind("<ButtonRelease-1>", self.getResult)
-#         # self.c.bind("<B1-Motion>", self.paint)
-
-#     # def getResult(self, e):
-#     #     x = self.master.winfo_rootx() + self.c.winfo_x()
-#     #     y = self.master.winfo_rooty() + self.c.winfo_y()
-#     #     x1 = x + self.c.winfo_width()
-#     #     y1 = y + self.c.winfo_height()
-#     #     img = PIL.ImageGrab.grab()
-#     #     img = img.crop((x, y, x1, y1))
-#     #     img.save("icon.png")
-#     #     imgPath = "icon.png"
-#     #     model = load_model('bangla_digit_model.h5')
-#     #     img = cv2.imread(imgPath)
-#     #     img = np.asarray(img)
-#     #     img = cv2.resize(img, (32, 32))
-#     #     img = preprocessing(img)
-#     #     img = img.reshape(1, 32, 32, 1)
-#     #     prediction = model.predict(img)
-
-#     #     # predict_x = model.predict(img)
-#     #     # classes_x = np.argmax(predict_x, axis=1)
-
-#     #     predict_x = model.predict(img)
-#     #     classes_x = np.argmax(predict_x, axis=1)
-#     #     print("predict_x", predict_x)
-#     #     print("classes_x", classes_x)
-
-#     #     classIndex = model.predict_classes(img)
-#     #     self.res = str(get_className(classIndex))
-#     #     self.pr['text'] = "Prediction: " + self.res
-
-#     def clear(self):
-#         self.c.delete('all')
-
-#     def putPoint(self, e):
-#         self.c.create_oval(e.x - self.bs, e.y - self.bs, e.x +
-#                            self.bs, e.y + self.bs, outline='black', fill='black')
-#         self.pre = [e.x, e.y]
-
-#     def paint(self, e):
-#         self.c.create_line(self.pre[0], self.pre[1], e.x, e.y,
-#                            width=self.bs * 2, fill='black', capstyle=ROUND, smooth=TRUE)
-
-#         self.pre = [e.x, e.y]
-
-
-# if __name__ == "__main__":
-#     root = Tk()
-#     main(root)
-#     root.title('Digit Classifier')
-#     root.resizable(0, 0)
-#     root.mainloop()
