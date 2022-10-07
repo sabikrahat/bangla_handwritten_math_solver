@@ -1,7 +1,13 @@
 
+from keras.models import load_model
 from tkinter import *
 from tkinter.ttk import *
 from PIL import ImageGrab
+import cv2
+import imutils
+from imutils.contours import sort_contours
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class main:
@@ -27,14 +33,18 @@ class main:
         self.x_cordinate = int((screen_width/2) - (self.root_width/2))
         self.y_cordinate = int((screen_height/2) - (self.root_height/2))
 
+        # canvas size 
+        self.canvas_width = self.root_width - 52
+        self.canvas_height = self.root_height - 150
+
         self.root.geometry("{}x{}+{}+{}".format(self.root_width, self.root_height, self.x_cordinate, self.y_cordinate))
-        self.c = Canvas(self.root, bd=3, relief="ridge", bg='white', height=self.root_height - 150, width=self.root_width - 52)
+        self.c = Canvas(self.root, bd=3, relief="ridge", bg='white', height=self.canvas_height, width=self.canvas_width)
         self.c.grid(row=0, column=0, columnspan=3, padx=20, pady=10)
 
         # Create label
-        label = Label(self.root, text = "Draw your mathematical term here...👆👆", )
-        label.config(font =("Courier", 14))
-        label.grid(row=1, column=0, columnspan=3)
+        self.label = Label(self.root, text = "Draw your mathematical term here...👆👆", )
+        self.label.config(font =("Courier", 14))
+        self.label.grid(row=1, column=0, columnspan=3)
 
         # Create label blank for spacing
         space = Label(self.root, text = "", )
@@ -66,10 +76,12 @@ class main:
     
     # Function for closing window
     def close(self):
+
         self.root.destroy()
 
     # Function for clearing the canvas
     def clear(self):
+        self.label['text'] = "Draw your mathematical term here...👆👆"
         self.c.delete("all")
 
     # Function for putting a point on the canvas
@@ -85,6 +97,8 @@ class main:
     # Function for solving the equation
     def solve(self):
         print('Solving the equation...')
+        self.label['text'] = 'Solving the equation...' 
+
         success = self.get_image()
         if success:
             self.get_solve()
@@ -92,6 +106,7 @@ class main:
     # Function for getting the image from the canvas
     def get_image(self):
         print('Processing image from the canvas...')
+        self.label['text'] = 'Processing image from the canvas...'
         #
         x, y = (self.c.winfo_rootx(), self.c.winfo_rooty())
         width, height = (self.c.winfo_width(), self.c.winfo_height())
@@ -102,11 +117,81 @@ class main:
         img = img.crop((a + 76, b + 48, c + 313, d + 154))
         img.save("drawn-image.png")
         print('Image saved!')
+        self.label['text'] = 'Image saved!'
         return True
 
     # Function for solving the prediction
     def get_solve(self):
         print('Solving the equation...')
+        self.label['text'] = 'Solving the equation...'
+        self.test_pipeline_equation("drawn-image.png")
+        pass
+
+    def test_pipeline_equation(self, image_path):
+        self.label['text'] = 'Loading the model...'
+        model = load_model('math_symbol_and_digit_recognition.h5')
+        chars = []
+        img = cv2.imread(image_path)
+        img = cv2.resize(img, (self.canvas_width, self.canvas_height))
+        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        edged = cv2.Canny(img_gray, 30, 150)
+        contours = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = imutils.grab_contours(contours)
+        contours = sort_contours(contours, method="left-to-right")[0]
+        labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'add', 'div', 'mul', 'sub']
+
+        for c in contours:
+            (x, y, w, h) = cv2.boundingRect(c)
+            if 20<=w and 30<=h:
+                roi = img_gray[y:y+h, x:x+w]
+                thresh = cv2.threshold(roi, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+                (th, tw) = thresh.shape
+                if tw > th:
+                    thresh = imutils.resize(thresh, width=32)
+                if th > tw:
+                    thresh = imutils.resize(thresh, height=32)
+                (th, tw) = thresh.shape
+                dx = int(max(0, 32 - tw)/2.0)
+                dy = int(max(0, 32 - th) / 2.0)
+                padded = cv2.copyMakeBorder(thresh, top=dy, bottom=dy, left=dx, right=dx, borderType=cv2.BORDER_CONSTANT,
+                                        value=(0, 0, 0))
+                padded = cv2.resize(padded, (32, 32))
+                padded = np.array(padded)
+                padded = padded/255.
+                padded = np.expand_dims(padded, axis=0)
+                padded = np.expand_dims(padded, axis=-1)
+                pred = model.predict(padded)
+                pred = np.argmax(pred, axis=1)
+                label = labels[pred[0]]
+                chars.append(label)
+                cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
+                cv2.putText(img, label, (x-5, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
+
+        plt.figure(figsize=(10, 10))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.savefig('system_prediction.png')
+        
+        e = ''
+        print('Equation: {}', chars)
+        for i in chars:
+            if i=='add':
+                e += '+'
+            elif i=='sub':
+                e += '-'
+            elif i=='mul':
+                e += '*'
+            elif i=='div':
+                e += '/'
+            else:
+                e += i
+        v = eval(e)
+        print('V Result: {}', v)
+        print('E Result: {}', e)
+
+        self.label['text'] = 'The result is: {} : {}'.format(e, v) 
+        print('Value of the expression {} : {}'.format(e, v))
         pass
 
 # Running the main class
