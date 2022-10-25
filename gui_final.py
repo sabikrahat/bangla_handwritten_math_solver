@@ -113,9 +113,9 @@ class main:
         a, b, c, d = (x, y, x+width, y+height)
         #
         img = ImageGrab.grab()
-        img.save("full-screen.png")
+        img.save("1_full-screen.png")
         img = img.crop((a + 76, b + 48, c + 313, d + 154))
-        img.save("drawn-image.png")
+        img.save("2_drawn-image.png")
         print('Image saved!')
         self.label['text'] = 'Image saved!'
         return True
@@ -124,7 +124,7 @@ class main:
     def get_solve(self):
         print('Solving the equation...')
         self.label['text'] = 'Solving the equation...'
-        self.test_pipeline_equation("drawn-image.png")
+        self.test_pipeline_equation("2_drawn-image.png")
         pass
 
     def test_pipeline_equation(self, image_path):
@@ -141,6 +141,7 @@ class main:
         labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'add', 'div', 'mul', 'sub']
 
         for c in contours:
+            print('Processing the image...')
             (x, y, w, h) = cv2.boundingRect(c)
             if 20<=w and 30<=h:
                 roi = img_gray[y:y+h, x:x+w]
@@ -153,8 +154,7 @@ class main:
                 (th, tw) = thresh.shape
                 dx = int(max(0, 32 - tw)/2.0)
                 dy = int(max(0, 32 - th) / 2.0)
-                padded = cv2.copyMakeBorder(thresh, top=dy, bottom=dy, left=dx, right=dx, borderType=cv2.BORDER_CONSTANT,
-                                        value=(0, 0, 0))
+                padded = cv2.copyMakeBorder(thresh, top=dy, bottom=dy, left=dx, right=dx, borderType=cv2.BORDER_CONSTANT, value=(0, 0, 0))
                 padded = cv2.resize(padded, (32, 32))
                 padded = np.array(padded)
                 padded = padded/255.
@@ -163,6 +163,7 @@ class main:
                 pred = model.predict(padded)
                 pred = np.argmax(pred, axis=1)
                 label = labels[pred[0]]
+                print(label)
                 chars.append(label)
                 cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
                 cv2.putText(img, label, (x-5, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
@@ -171,7 +172,7 @@ class main:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         plt.imshow(img)
         plt.axis('off')
-        plt.savefig('system_prediction.png')
+        plt.savefig('3_system_prediction.png')
         
         e = ''
         print('Equation: {}', chars)
