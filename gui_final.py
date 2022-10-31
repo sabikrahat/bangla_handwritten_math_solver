@@ -14,7 +14,7 @@ class main:
     def __init__(self):
         self.res = ""
         self.pre = [None, None]
-        self.bs = 5.5
+        self.bs = 5.0
 
         self.root = Tk()
         self.root.title("Bangla Handwriting Math Solver")
@@ -137,13 +137,16 @@ class main:
         edged = cv2.Canny(img_gray, 30, 150)
         contours = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = imutils.grab_contours(contours)
+        print('Number of contours found: ', len(contours))
         contours = sort_contours(contours, method="left-to-right")[0]
         labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'add', 'div', 'mul', 'sub']
 
-        for c in contours:
-            print('Processing the image...')
+        for i, c in enumerate(contours):
+            print('Processing the image...: ', str(i+1))
             (x, y, w, h) = cv2.boundingRect(c)
-            if 20<=w and 30<=h:
+            print('x: ', x, 'y: ', y, 'w: ', w, 'h: ', h)
+            # if x > 0 and y > 0 and w >= 5 and h >= 25:
+            if x > 0 and y > 0 and w > 5:  # cheaking weather any garbage value detecting
                 roi = img_gray[y:y+h, x:x+w]
                 thresh = cv2.threshold(roi, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
                 (th, tw) = thresh.shape
@@ -163,7 +166,7 @@ class main:
                 pred = model.predict(padded)
                 pred = np.argmax(pred, axis=1)
                 label = labels[pred[0]]
-                print(label)
+                print('>>>>The {} no word is : {}'.format(i, label))
                 chars.append(label)
                 cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
                 cv2.putText(img, label, (x-5, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255))
