@@ -101,7 +101,7 @@ class main:
 
         success = self.get_image()
         if success:
-            self.get_solve()
+            self.get_equation_and_solve()
 
     # Function for getting the image from the canvas
     def get_image(self):
@@ -113,25 +113,46 @@ class main:
         a, b, c, d = (x, y, x+width, y+height)
         #
         img = ImageGrab.grab()
-        img.save("1_full-screen.png")
+        img.save("output/1_full-screen.png")
         img = img.crop((a + 76, b + 48, c + 313, d + 154))
-        img.save("2_drawn-image.png")
+        img.save("output/2_drawn-image.png")
         print('Image saved!')
         self.label['text'] = 'Image saved!'
         return True
 
     # Function for solving the prediction
-    def get_solve(self):
+    def get_equation_and_solve(self):
         print('Solving the equation...')
         self.label['text'] = 'Solving the equation...'
-        self.test_pipeline_equation("2_drawn-image.png")
-        pass
-
-    def test_pipeline_equation(self, image_path):
-        self.label['text'] = 'Loading the model...'
         model = load_model('math_symbol_and_digit_recognition.h5')
         chars = []
-        img = cv2.imread(image_path)
+        
+        img = cv2.imread("output/2_drawn-image.png")
+        # img = cv2.imread("test_data/test_equation_2.jpg")
+
+        ##### removing noise #####
+        # convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+        # blur
+        blur = cv2.GaussianBlur(gray, (0,0), sigmaX=33, sigmaY=33)
+        # divide
+        divide = cv2.divide(gray, blur, scale=255)
+        # otsu threshold
+        thresh = cv2.threshold(divide, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
+        # apply morphology
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+        morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+        # write result to disk
+        cv2.imwrite("output/3_gray_noise_remove.jpg", gray)
+        cv2.imwrite("output/4_blur_noise_remove.jpg", blur)
+        cv2.imwrite("output/5_divide_noise_remove.jpg", divide)
+        cv2.imwrite("output/6_thresh_noise_remove.jpg", thresh)
+        cv2.imwrite("output/7_morph_noise_remove.jpg", morph)
+
+        
+        img = cv2.imread("output/6_thresh_noise_remove.jpg")
+        # img = cv2.imread("output/7_morph_noise_remove.jpg")
+
         img = cv2.resize(img, (self.canvas_width, self.canvas_height))
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         edged = cv2.Canny(img_gray, 30, 150)
@@ -175,7 +196,7 @@ class main:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         plt.imshow(img)
         plt.axis('off')
-        plt.savefig('3_system_prediction.png')
+        plt.savefig('output/8_system_prediction.png')
         
         e = ''
         print('Equation: {}', chars)
