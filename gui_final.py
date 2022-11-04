@@ -166,8 +166,7 @@ class main:
             print('Processing the image...: ', str(i+1))
             (x, y, w, h) = cv2.boundingRect(c)
             print('x: ', x, 'y: ', y, 'w: ', w, 'h: ', h)
-            # if x > 0 and y > 0 and w >= 5 and h >= 25:
-            if x > 0 and y > 0 and w > 5:  # cheaking weather any garbage value detecting
+            if x > 0 and y > 0 and w > 20:  # cheaking weather any garbage value detecting
                 roi = img_gray[y:y+h, x:x+w]
                 thresh = cv2.threshold(roi, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
                 (th, tw) = thresh.shape
