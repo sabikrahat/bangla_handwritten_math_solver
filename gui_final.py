@@ -156,6 +156,7 @@ class main:
         img = cv2.resize(img, (self.canvas_width, self.canvas_height))
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         edged = cv2.Canny(img_gray, 30, 150)
+        cv2.imwrite("output/8_all_canny_detect.jpg", edged)
         contours = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = imutils.grab_contours(contours)
         print('Number of contours found: ', len(contours))
@@ -193,9 +194,11 @@ class main:
 
         plt.figure(figsize=(10, 10))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cv2.imwrite("output/9_system_prediction.jpg", img)
         plt.imshow(img)
+        plt.savefig('output/10_with_axis.png')
         plt.axis('off')
-        plt.savefig('output/8_system_prediction.png')
+        plt.savefig('output/11_without_axis.png')
         
         e = ''
         print('Equation: {}', chars)
