@@ -1,20 +1,21 @@
-
+from tkinter import filedialog
 from keras.models import load_model
 from tkinter import *
 from tkinter.ttk import *
-from PIL import ImageGrab
+from PIL import ImageGrab, Image, ImageTk
 import cv2
 import imutils
 from imutils.contours import sort_contours
 import numpy as np
 import matplotlib.pyplot as plt
-
+import os
 
 class main:
     def __init__(self):
         self.res = ""
         self.pre = [None, None]
         self.bs = 5.0
+        self.pick_image_path = None
 
         self.root = Tk()
         self.root.title("Bangla Handwriting Math Solver")
@@ -37,19 +38,18 @@ class main:
         self.canvas_width = self.root_width - 52
         self.canvas_height = self.root_height - 150
 
-        self.root.geometry("{}x{}+{}+{}".format(self.root_width, self.root_height, self.x_cordinate, self.y_cordinate))
-        self.c = Canvas(self.root, bd=3, relief="ridge", bg='white', height=self.canvas_height, width=self.canvas_width)
-        self.c.grid(row=0, column=0, columnspan=3, padx=20, pady=10)
+
+        self.show_image_or_canvas()
 
         # Create label
-        self.label = Label(self.root, text = "Draw your mathematical term here...👆👆", )
-        self.label.config(font =("Courier", 14))
-        self.label.grid(row=1, column=0, columnspan=3)
+        self.label = Label(self.root, text = "Pick a image or Draw your mathematical term here...👆👇", )
+        self.label.config(font =("Courier", 14), justify=CENTER)
+        self.label.grid(row=1, column=0, columnspan=4)
 
         # Create label blank for spacing
         space = Label(self.root, text = "", )
         space.config(font =("Courier", 14))
-        space.grid(row=2, column=0, columnspan=3)
+        space.grid(row=2, column=0, columnspan=4)
 
         style = Style()
         
@@ -68,21 +68,57 @@ class main:
         exit_btn = Button(self.root, text = 'Solve', style = 'S.TButton', command = self.solve)
         exit_btn.grid(row = 3, column = 2)
 
-        self.c.bind("<Button-1>", self.putPoint)
-        # self.c.bind("<ButtonRelease-1>", self.getResult)
-        self.c.bind("<B1-Motion>", self.paint)
+        ''' Button 4: Solve'''
+        style.configure('B.TButton', font = ('calibri', 15, 'bold', 'underline'), foreground = 'green')
+        exit_btn = Button(self.root, text = 'Browse Image', style = 'B.TButton', command = self.browse)
+        exit_btn.grid(row = 3, column = 3)
 
         self.root.mainloop()
+
+    # Funtion for showing image or canvas
+    def show_image_or_canvas(self):
+        if self.pick_image_path is None:
+            print('Showing canvas...')
+            self.root.geometry("{}x{}+{}+{}".format(self.root_width, self.root_height, self.x_cordinate, self.y_cordinate))
+            self.c = Canvas(self.root, bd=3, relief="ridge", bg='white', height=self.canvas_height, width=self.canvas_width)
+            self.c.grid(row=0, column=0, columnspan=4, padx=20, pady=10)
+
+            self.c.bind("<Button-1>", self.putPoint)
+            # self.c.bind("<ButtonRelease-1>", self.getResult)
+            self.c.bind("<B1-Motion>", self.paint)
+            pass
+
+        else:
+            print('Showing image...')
+            img = Image.open(self.pick_image_path)
+            img = img.resize((self.canvas_width, self.canvas_height))
+            img = ImageTk.PhotoImage(img)
+            self.canvas_img = Label(self.root)
+            self.canvas_img.configure(image=img)
+            self.canvas_img.image = img
+            self.canvas_img.grid(row=0, column=0, columnspan=4, padx=20, pady=10)
+            pass
     
+    # Function for browsing image
+    def browse(self):
+        fln = filedialog.askopenfilename(initialdir = os.getcwd(), title = "Select Image", filetypes = (("jpg files","*.jpg"),("jpeg files","*.jpeg"),("png files","*.png"),("all files","*.*")))
+        print('Browsed Image: ', fln)
+        self.pick_image_path = fln
+        self.show_image_or_canvas()
+        self.get_equation_and_solve(self.pick_image_path)
+
     # Function for closing window
     def close(self):
-
         self.root.destroy()
 
     # Function for clearing the canvas
     def clear(self):
-        self.label['text'] = "Draw your mathematical term here...👆👆"
-        self.c.delete("all")
+        self.label['text'] = "Pick a image or Draw your mathematical term here...👆👇"
+        if self.pick_image_path is not None:
+            self.pick_image_path = None
+            self.show_image_or_canvas()
+        else:
+            self.c.delete("all")
 
     # Function for putting a point on the canvas
     def putPoint(self, e):
@@ -101,7 +137,7 @@ class main:
 
         success = self.get_image()
         if success:
-            self.get_equation_and_solve()
+            self.get_equation_and_solve("output/2_drawn-image.png")
 
     # Function for getting the image from the canvas
     def get_image(self):
@@ -121,14 +157,13 @@ class main:
         return True
 
     # Function for solving the prediction
-    def get_equation_and_solve(self):
+    def get_equation_and_solve(self, path):
         print('Solving the equation...')
         self.label['text'] = 'Solving the equation...'
         model = load_model('math_symbol_and_digit_recognition.h5')
         chars = []
         
-        img = cv2.imread("output/2_drawn-image.png")
-        # img = cv2.imread("test_data/test_equation_2.jpg")
+        img = cv2.imread(path)
 
         ##### removing noise #####
         # convert to grayscale
@@ -200,25 +235,31 @@ class main:
         plt.axis('off')
         plt.savefig('output/11_without_axis.png')
         
-        e = ''
-        print('Equation: {}', chars)
-        for i in chars:
-            if i=='add':
-                e += '+'
-            elif i=='sub':
-                e += '-'
-            elif i=='mul':
-                e += '*'
-            elif i=='div':
-                e += '/'
-            else:
-                e += i
-        v = eval(e)
-        print('V Result: {}', v)
-        print('E Result: {}', e)
+        try:
+            e = ''
+            print('Equation: {}', chars)
+            for i in chars:
+                if i=='add':
+                    e += '+'
+                elif i=='sub':
+                    e += '-'
+                elif i=='mul':
+                    e += '*'
+                elif i=='div':
+                    e += '/'
+                else:
+                    e += i
+            v = eval(e)
+            print('V Result: {}', v)
+            print('E Result: {}', e)
 
-        self.label['text'] = 'The result is: {} : {}'.format(e, v) 
-        print('Value of the expression {} : {}'.format(e, v))
+            self.label['text'] = 'The result is: {} : {}'.format(e, v) 
+            print('Value of the expression {} : {}'.format(e, v))
+
+        except Exception as e:
+            self.label['text'] = 'Sorry! I got hanged 🤐.\nError: {}'.format(e)
+            print('Error: {}'.format(e))
+
         pass
 
 # Running the main class
