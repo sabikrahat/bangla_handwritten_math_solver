@@ -19,6 +19,7 @@
 ## Commands
 
 - py -m pip install -r requirements.txt
+- python version: ```3.8.5```
 
 ```
 absl-py==1.3.0
@@ -42,11 +43,12 @@ certifi==2022.12.7
 cffi==1.15.1
 charset-normalizer==2.1.1
 click==8.1.3
+colorama==0.4.6
 coloredlogs==15.0.1
 comm==0.1.2
 contourpy==1.0.6
 cycler==0.11.0
-debugpy==1.6.4
+debugpy==1.6.5
 decorator==5.1.1
 defusedxml==0.7.1
 entrypoints==0.4
@@ -75,25 +77,20 @@ imutils==0.5.4
 ipykernel==6.19.4
 ipython==8.8.0
 ipython-genutils==0.2.0
-ipywidgets==8.0.4
 isoduration==20.11.0
 jedi==0.18.2
 Jinja2==3.1.2
 joblib==1.2.0
 jsonpointer==2.3
 jsonschema==4.17.3
-jupyter==1.0.0
-jupyter-console==6.4.4
 jupyter-events==0.5.0
 jupyter_client==7.4.8
 jupyter_core==5.1.2
 jupyter_server==2.0.6
 jupyter_server_terminals==0.4.3
 jupyterlab-pygments==0.2.2
-jupyterlab-widgets==3.0.5
 keras==2.11.0
 kiwisolver==1.4.4
-lab==7.2
 libclang==14.0.6
 llvmlite==0.39.1
 Markdown==3.4.1
@@ -108,7 +105,7 @@ nbclient==0.7.2
 nbconvert==7.2.7
 nbformat==5.7.1
 nest-asyncio==1.5.6
-networkx==2.8.8
+networkx==3.0
 notebook==6.5.2
 notebook_shim==0.2.2
 numba==0.56.4
@@ -123,7 +120,6 @@ packaging==22.0
 pandas==1.5.2
 pandocfilters==1.5.0
 parso==0.8.3
-pexpect==4.8.0
 pickleshare==0.7.5
 Pillow==9.3.0
 pkgutil_resolve_name==1.3.10
@@ -133,7 +129,6 @@ prometheus-client==0.15.0
 prompt-toolkit==3.0.36
 protobuf==3.19.6
 psutil==5.9.4
-ptyprocess==0.7.0
 pure-eval==0.2.2
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
@@ -142,16 +137,17 @@ pydantic==1.10.4
 Pygments==2.14.0
 PyMatting==1.1.8
 pyparsing==3.0.9
+pyreadline3==3.4.1
 pyrsistent==0.19.3
 python-dateutil==2.8.2
 python-json-logger==2.0.4
 python-multipart==0.0.5
 pytz==2022.7
 PyWavelets==1.4.1
+pywin32==305
+pywinpty==2.0.10
 PyYAML==6.0
 pyzmq==24.0.1
-qtconsole==5.4.0
-QtPy==2.3.0
 rembg==2.0.30
 requests==2.28.1
 requests-oauthlib==1.3.1
@@ -160,10 +156,9 @@ rfc3986-validator==0.1.1
 rsa==4.9
 scikit-image==0.19.3
 scikit-learn==1.2.0
-scipy==1.9.3
+scipy==1.10.0
 seaborn==0.12.2
 Send2Trash==1.8.0
-simplejson==3.18.1
 six==1.16.0
 sklearn==0.0.post1
 sniffio==1.3.0
@@ -176,16 +171,17 @@ tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.1
 tensorflow==2.11.0
 tensorflow-estimator==2.11.0
+tensorflow-intel==2.11.0
 tensorflow-io-gcs-filesystem==0.29.0
 termcolor==2.2.0
 terminado==0.17.1
 threadpoolctl==3.1.0
 tifffile==2022.10.10
 tinycss2==1.2.1
+tk==0.1.0
 tornado==6.2
 tqdm==4.64.1
 traitlets==5.8.0
-txt2tags==3.7
 typing_extensions==4.4.0
 uri-template==1.2.0
 urllib3==1.26.13
@@ -196,7 +192,6 @@ webcolors==1.12
 webencodings==0.5.1
 websocket-client==1.4.2
 Werkzeug==2.2.2
-widgetsnbextension==4.0.5
 wrapt==1.14.1
 yarl==1.8.2
 zipp==3.11.0
